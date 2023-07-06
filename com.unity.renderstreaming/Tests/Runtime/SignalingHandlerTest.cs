@@ -65,14 +65,6 @@ namespace Unity.RenderStreaming.RuntimeTest
     {
         public Action<string> OnReceiveMessage;
 
-        public void SetLocal(bool isLocal)
-        {
-            Type myClass = typeof(DataChannelBase);
-            FieldInfo fieldLocal = myClass.GetField("local",
-                BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic);
-            fieldLocal.SetValue(this, true);
-        }
-
         public void SetLabel(string label)
         {
             Type myClass = typeof(DataChannelBase);
@@ -160,9 +152,6 @@ namespace Unity.RenderStreaming.RuntimeTest
             var container = TestContainer<BroadcastBehaviourTest>.Create("test");
             var channel = container.test.gameObject.AddComponent<DataChannelTest>();
             channel.SetLabel("test");
-            channel.SetLocal(true);
-
-            Assert.That(channel.IsLocal, Is.True);
             Assert.That(channel.Label, Is.EqualTo("test"));
             Assert.That(channel.IsConnected, Is.False);
 
@@ -397,7 +386,6 @@ namespace Unity.RenderStreaming.RuntimeTest
             var container = TestContainer<SingleConnectionBehaviourTest>.Create("test");
             var handler = container.test.component;
             var channel = container.test.gameObject.AddComponent<DataChannelTest>();
-            channel.SetLocal(true);
             channel.SetLabel("test");
 
             handler.AddComponent(channel);
@@ -405,7 +393,6 @@ namespace Unity.RenderStreaming.RuntimeTest
 
             yield return new WaitUntil(() => container.test.component.ExistConnection(connectionId));
 
-            Assert.That(channel.IsLocal, Is.True);
             Assert.That(channel.Label, Is.EqualTo("test"));
 
             container.test.component.DeleteConnection(connectionId);
@@ -420,10 +407,8 @@ namespace Unity.RenderStreaming.RuntimeTest
             var container = TestContainer<SingleConnectionBehaviourTest>.Create("test");
             var channel = container.test.gameObject.AddComponent<DataChannelTest>();
 
-            channel.SetLocal(true);
             channel.SetLabel("test");
 
-            Assert.That(channel.IsLocal, Is.True);
             Assert.That(channel.IsConnected, Is.False);
             Assert.That(channel.Label, Is.EqualTo("test"));
 
@@ -431,7 +416,6 @@ namespace Unity.RenderStreaming.RuntimeTest
             container.test.component.CreateConnection(connectionId);
             yield return new WaitUntil(() => container.test.component.ExistConnection(connectionId));
 
-            Assert.That(channel.IsLocal, Is.True);
             Assert.That(channel.IsConnected, Is.False);
             Assert.That(channel.Label, Is.EqualTo("test"));
 
@@ -518,12 +502,9 @@ namespace Unity.RenderStreaming.RuntimeTest
             bool isStoppedChannel2 = false;
             channel2.OnStartedChannel += _ => isStartedChannel2 = true;
             channel2.OnStoppedChannel += _ => isStoppedChannel2 = true;
-
-            channel2.SetLocal(true);
             channel2.SetLabel("test");
 
             Assert.That(channel2.IsConnected, Is.False);
-            Assert.That(channel2.IsLocal, Is.True);
             Assert.That(channel2.Label, Is.EqualTo("test"));
 
             container2.test.component.AddComponent(channel2);
@@ -533,7 +514,6 @@ namespace Unity.RenderStreaming.RuntimeTest
             Assert.That(isStartedChannel1, Is.True);
             Assert.That(isStartedChannel2, Is.True);
 
-            Assert.That(channel1.IsLocal, Is.False);
             Assert.That(channel1.Label, Is.EqualTo("test"));
 
             Assert.That(channel1.IsConnected, Is.True);
